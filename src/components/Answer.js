@@ -4,6 +4,7 @@ import PropTypes from 'prop-types';
 import { EditorState, ContentState, convertFromHTML } from 'draft-js'
 import { Editor } from 'react-draft-wysiwyg';
 import FA from 'react-fontawesome';
+import Button from 'react-bootstrap/lib/Button';
 
 import QuestionAnswerEditor from './QuestionAnswerEditor';
 import {reorderAnswer, removeAnswer} from '../reducers/question';
@@ -11,7 +12,7 @@ import {reorderAnswer, removeAnswer} from '../reducers/question';
 const styles = {
   border: {border: '1px solid'},
   mt30: {marginTop: '30px'},
-  answerRow: {backgroundColor:'#ffd9d9', minWidth: '100%'},
+  answerRow: {backgroundColor:'#ffd9d9', minWidth: '100%', minHeight: '5px'},
   faCircle: {
     display     : 'inline-block',
     borderRadius: '20px',
@@ -27,7 +28,9 @@ class Question extends Component {
   constructor(props) {
     super();
 
+    this.markAsCorrect = ::this.markAsCorrect;
     this.onEditorStateChange = ::this.onEditorStateChange;
+    this.onFeedBackStateChange = ::this.onFeedBackStateChange;
     this.reoderQuestionDown = ::this.reoderQuestion.bind(this, false);
     this.reoderQuestionUp = ::this.reoderQuestion.bind(this, true);
     this.removeAnswer = ::this.removeAnswer;
@@ -39,6 +42,8 @@ class Question extends Component {
     this.state = {
       editorState: EditorState.createWithContent(
       ContentState.createFromBlockArray(convertFromHTML(`<p>${props.content}</p>`))),
+      feedBackEditorState: EditorState.createWithContent(
+      ContentState.createFromBlockArray(convertFromHTML(`<p>Feedback</p>`))),
     };
   }
 
@@ -62,6 +67,16 @@ class Question extends Component {
   onEditorStateChange = (editorState) => {
     this.setState({
       editorState,
+    });
+  };
+
+  /**
+   * Handle feedback state change
+   * @param editorState
+   */
+  onFeedBackStateChange = (editorState) => {
+    this.setState({
+      feedBackEditorState: editorState,
     });
   };
 
@@ -101,12 +116,15 @@ class Question extends Component {
     />);
   }
 
+  markAsCorrect() {
+
+  }
+
   render() {
-    const {editorState} = this.state;
-    const {position, length, item} = this.props;
+    const {editorState, feedBackEditorState} = this.state;
+    const {position, length} = this.props;
     return (
     <div>
-      <p>{item}</p>
       <div style={styles.answerRow} >
         {this.createFaIcon(position, 'angle-up')}
         {position !== length - 1 ? this.createFaIcon(position, 'angle-down', false) : <span/>}
@@ -116,9 +134,12 @@ class Question extends Component {
         style={styles.faCircle}
         onClick={this.removeAnswer}
         />
+        <div style={styles.answerRow}><Button onClick={this.markAsCorrect} bsStyle="info">Mark as Correct</Button></div>
       </div>
       <QuestionAnswerEditor editorState={editorState} style={styles.border}
                             onEditorStateChange={this.onEditorStateChange}/>
+      <QuestionAnswerEditor editorState={feedBackEditorState} style={styles.border}
+                            onEditorStateChange={this.onFeedBackStateChange}/>
     </div>
     );
   }

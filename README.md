@@ -1,3 +1,3 @@
 # Example question and answer application
 
-## `yarn install && yarn state`
+## `yarn install && yarn start`
